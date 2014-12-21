@@ -19,15 +19,18 @@ volatile int rad_count = 0;
 
 int rad_div = 120;
 int rad_div_half = rad_div/2;
+int num_tiers = 15;
 int spacing = rad_div/8;
 int sample_size = 200;
 int degree_delay_us = 0;
+int timing_offset_us = 6;
 
 bool rpm_check = true;
 
-void update_display(int);
-void store_data(int, int, int);
+void light_it_up(int);
+void write_data_array(int, int, int);
 void rad_increment();
+void timing();
 
 int main()
 {
@@ -43,60 +46,39 @@ int main()
     };
     for(j = 0; j < 4; j++) {
         for(int l = 0; l < 7; l++) {
-            store_data(SQUARE2[l],SQUARE1[l] + rad_div*j/4,2);
-            store_data(SQUARE2[l],SQUARE1[l] + rad_div*j/4,10);
+            write_data_array(2, SQUARE1[l] + rad_div*j/4, SQUARE2[l]);
+            write_data_array(10, SQUARE1[l] + rad_div*j/4, SQUARE2[l]);
         }
-        store_data(16,30*j,3);
-        store_data(16,30*j,4);
-        store_data(16,30*j,5);
-        store_data(16,30*j,6);
-        store_data(16,30*j,7);
-        store_data(16,30*j,8);
-        store_data(16,30*j,9);
+        write_data_array(3,30*j,16);
+        write_data_array(4,30*j,16);
+        write_data_array(5,30*j,16);
+        write_data_array(6,30*j,16);
+        write_data_array(7,30*j,16);
+        write_data_array(8,30*j,16);
+        write_data_array(9,30*j,16);
     }
-
-    int begin, end, overhead;
-    timer.start();
-    begin = timer.read_us();
-
-    for(j = 0; j < sample_size; j++) {
-        for(degree = 0; degree < rad_div; degree++) {
-            update_display(degree);
-            wait_us(degree_delay_us);
-        }
-    }
-
-    end = timer.read_us();
-    overhead = end - begin;
-
-    wait(20);
-
-    timer.reset();
-    RPM_LED = 1;
-    RPM_FOTO = 1;
-    begin = timer.read_us();
-    RPM.fall(&rad_increment);
-    while(rad_count < sample_size);
-    end = timer.read_us();
-    RPM.fall(NULL);
-    RPM_LED = 0;
-    RPM_FOTO = 0;
-    degree_delay_us = (end - begin - overhead)/rad_div/sample_size + 7;
-
-
+    
+    
+    
+    timing();
     
 
 
     //Main display loop;
     while(1) {
         for(degree = 0; degree < rad_div; degree++) {
-            update_display(degree);
+            light_it_up(degree);
             wait_us(degree_delay_us);
         }
     }
+
+
+
+
+
 }
 
-void update_display(int deg)
+void light_it_up(int deg) //Outputs LED pattern for the given radial degree.
 {
     Latch = 0;
     for(i = 0; i < 15; i++) {
@@ -127,9 +109,51 @@ void update_display(int deg)
     Latch = 1;
 }
 
-void store_data(int num, int degree, int tier)
+void write_data_array(int tier, int degree, int num) //Writes to data_array given the tier, degree, and num coordinates. Converts 
 {
-    data_array[(degree + spacing*(tier%4))%rad_div][tier] = num;
+    data_array[(rad_div + degree - spacing*(tier%4))%rad_div][tier] = num;
+}
+
+void clear_data_array()
+{
+    for(int t_rad = 0; t_rad < rad_div; T_rad++){
+        for(int t_tier = 0; t_tier < num_tiers; t_tier++){
+            data_array[t_rad][t_tier] = 0;
+        }
+    }
+}
+
+void timing() //Calculates the delay between each degree.
+{
+    int begin, end, overhead;
+    timer.start();
+    begin = timer.read_us();
+
+    for(j = 0; j < sample_size; j++) {
+        for(degree = 0; degree < rad_div; degree++) {
+            light_it_up(degree);
+            wait_us(degree_delay_us);
+        }
+    }
+
+    end = timer.read_us();
+    overhead = end - begin;
+
+    wait(10);
+
+    timer.reset();
+    RPM_LED = 1;
+    RPM_FOTO = 1;
+    rad_count = 0;
+
+    begin = timer.read_us();
+    RPM.fall(&rad_increment);
+    while(rad_count < sample_size);
+    end = timer.read_us();
+    RPM.fall(NULL);
+    RPM_LED = 0;
+    RPM_FOTO = 0;
+    degree_delay_us = (end - begin - overhead)/rad_div/sample_size + timing_offset_us;
 }
 
 void rad_increment()
