@@ -14,8 +14,8 @@ public class Whirlygig {
 	 * @param	layer	A 2D pixel/voxel int array representing the layer.
 	 * @param			A 2D int array with instructions for each slice/LED.
 	 */
-	public static int[][] transcribeLayer(int[][] layer) {
-		int[][] sequence = new int[SLICES][RADIUS];
+	public static byte[][] transcribeLayer(byte[][] layer) {
+		byte[][] sequence = new byte[SLICES][RADIUS];
 
 		// For each slice
 		for (int a = 0; a < SLICES; a++) {
@@ -48,7 +48,7 @@ public class Whirlygig {
 
 	public static void main(String[] args) {
 		// Generate a square outline for the layer size
-		int[][] layer = new int[LAYER_SIZE][LAYER_SIZE];
+		byte[][] layer = new byte[LAYER_SIZE][LAYER_SIZE];
 		for (int row = 0; row < LAYER_SIZE; row++) {
 			for (int col = 0; col < LAYER_SIZE; col++) {
 				if (row == 0 || row == LAYER_SIZE-1
@@ -61,7 +61,7 @@ public class Whirlygig {
 		}
 
 		// Transcribe and output a single layer
-		int[][] sequence = transcribeLayer(layer);
+		byte[][] sequence = transcribeLayer(layer);
 		for (int a = 0; a < SLICES; a++) {
 			for (int r = 0; r < RADIUS; r++) {
 				System.out.print(sequence[a][r]);
