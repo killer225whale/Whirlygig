@@ -2,6 +2,7 @@ Whirlygig
 =========
 
 Persistence of Vision Volumetric Display  
+Display Dimensions: 15 vertical layers, with 16 LED radius. Currently set at 120 radial divisions (3 degree separation)
 Video here: https://www.youtube.com/watch?v=8MFhoGbUYPY
 
 480 Blue SMD LEDs  
@@ -17,4 +18,4 @@ Photodiode + LED
 A lot of 30-gauge magnet wire  
 Lots and lots of hot glue, solder, and superglue.  
 
-Display Dimensions: 15 vertical layers, with 16 LED radius. Currently set at 120 radial divisions (3 degree separation)
+
